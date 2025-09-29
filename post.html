@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>EMO MOC | 投稿詳細（円）</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+  body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;margin:0;background:#0f1115;color:#eaeaea}
+  header{padding:14px 16px;background:#111;border-bottom:1px solid #222}
+  header nav{display:flex;justify-content:space-between;align-items:center}
+  header a{color:#9aa0a6;text-decoration:none;margin-left:12px}
+  main{max-width:960px;margin:24px auto;padding:0 16px}
+  .card{background:#14171d;border:1px solid #222;border-radius:14px;padding:18px}
+  h1{margin:.2em 0 .4em;font-size:22px}
+  .meta{color:#9aa0a6;font-size:13px;margin-bottom:10px}
+  .img{width:100%;max-height:420px;object-fit:cover;border-radius:12px;border:1px solid #222}
+  .reactions{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin-top:16px}
+  .rx{display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px;border-radius:12px;background:#1a1f27;border:1px solid #222;cursor:pointer;user-select:none}
+  .rx small{color:#9aa0a6}
+  .rx.active{outline:2px solid #4e8cff}
+  .grid{display:grid;grid-template-columns:1.2fr .8fr;gap:18px;margin-top:18px}
+  canvas{background:#0f1115;border:1px solid #222;border-radius:12px;padding:8px}
+  .legend{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+  .pill{padding:6px 10px;border-radius:999px;background:#1a1f27;border:1px solid #222;font-size:12px}
+  .cta{margin-top:16px;display:flex;gap:8px}
+  .btn{padding:10px 14px;border-radius:10px;border:1px solid #333;background:#1d232f;color:#eaeaea;cursor:pointer}
+</style>
+</head>
+<body>
+<header>
+  <nav>
+    <strong>EMO MOC | 投稿詳細（円）</strong>
+    <div>
+      <a href="index.html">トップ</a>
+      <a href="profile.html">プロフィール</a>
+      <a href="form.html">投稿フォーム</a>
+    </div>
+  </nav>
+</header>
+
+<main class="card">
+  <h1>蕎麦打ち体験 @ 小諸</h1>
+  <div class="meta">投稿者：<a href="profile.html">@komoro_soba</a>・2025/09/28・カテゴリ：体験</div>
+  <img class="img" src="https://images.unsplash.com/photo-1544511916-0148ccdeb877?q=80&w=1600&auto=format&fit=crop" alt="蕎麦打ち体験">
+  <p>粉から打って茹でるまで90分。意外とコツがいるが、講師が丁寧で安心感があった。香りは強いが喉越しは軽い。観光ついででも十分楽しめる。</p>
+
+  <!-- 6感情リアクション -->
+  <div class="reactions" id="reactions">
+    <div class="rx" data-key="joy">😊 喜び <small id="c-joy">48</small></div>
+    <div class="rx" data-key="surprise">😮 驚き <small id="c-surprise">32</small></div>
+    <div class="rx" data-key="trust">🤝 信頼 <small id="c-trust">21</small></div>
+    <div class="rx" data-key="interest">✨ 期待 <small id="c-interest">27</small></div>
+    <div class="rx" data-key="doubt">🤔 疑念 <small id="c-doubt">8</small></div>
+    <div class="rx" data-key="dislike">🙅 不快 <small id="c-dislike">3</small></div>
+  </div>
+
+  <div class="grid">
+    <div>
+      <canvas id="pie"></canvas>
+      <div class="legend" id="legend"></div>
+    </div>
+    <div>
+      <div class="pill">総リアクション数：<span id="total">139</span></div>
+      <div class="pill">ポジティブ指数（暫定）：<span id="pos">+72</span></div>
+      <div class="pill">“信頼×期待”スコア：<span id="txi">38</span></div>
+      <div class="cta"><button class="btn" id="share">共有</button><button class="btn">通報</button></div>
+    </div>
+  </div>
+</main>
+
+<script>
+  // ===== ダミーデータ（API置換ポイント） =====
+  const data = {joy:48,surprise:32,trust:21,interest:27,doubt:8,dislike:3};
+  const order = ["joy","surprise","trust","interest","doubt","dislike"];
+  const labels = {joy:"喜び",surprise:"驚き",trust:"信頼",interest:"期待",doubt:"疑念",dislike:"不快"};
+
+  function refresh() {
+    const total = Object.values(data).reduce((a,b)=>a+b,0);
+    document.getElementById('total').textContent = total;
+    const pos = (data.joy+data.trust+data.interest) - (data.doubt+data.dislike);
+    document.getElementById('pos').textContent = (pos>0?'+':'')+pos;
+    document.getElementById('txi').textContent = Math.round((data.trust*data.interest)/Math.max(total,1));
+    if (pie){ pie.data.datasets[0].data = order.map(k=>data[k]); pie.update(); }
+    order.forEach(k=>document.getElementById(`c-${k}`).textContent = data[k]);
+    legend.innerHTML = '';
+    order.forEach(k=>{
+      const pill = document.createElement('div'); pill.className='pill';
+      pill.textContent = `${labels[k]}：${data[k]}`; legend.appendChild(pill);
+    });
+  }
+
+  // 円グラフ
+  const ctx = document.getElementById('pie').getContext('2d');
+  const pie = new Chart(ctx,{ type:'pie',
+    data:{ labels:order.map(k=>labels[k]), datasets:[{ data:order.map(k=>data[k]) }]},
+    options:{ responsive:true, plugins:{ legend:{display:false},
+      tooltip:{callbacks:{label:(c)=>`${c.label}: ${c.parsed}件`}}}}
+  });
+
+  // 凡例
+  const legend = document.getElementById('legend'); refresh();
+
+  // クリックでカウント増（MOC用）
+  document.querySelectorAll('.rx').forEach(el=>{
+    el.addEventListener('click', ()=>{
+      document.querySelectorAll('.rx').forEach(x=>x.classList.remove('active'));
+      el.classList.add('active');
+      data[el.dataset.key]++; refresh();
+    });
+  });
+
+  document.getElementById('share').onclick = ()=>alert('共有リンクをコピーしました（ダミー）');
+</script>
+</body>
+</html>

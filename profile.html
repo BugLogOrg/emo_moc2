@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>EMO MOC | プロフィール（折れ線）</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+  body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;margin:0;background:#0f1115;color:#eaeaea}
+  header{padding:14px 16px;background:#111;border-bottom:1px solid #222}
+  header nav{display:flex;justify-content:space-between;align-items:center}
+  header a{color:#9aa0a6;text-decoration:none;margin-left:12px}
+  main{max-width:980px;margin:24px auto;padding:0 16px}
+  .card{background:#14171d;border:1px solid #222;border-radius:14px;padding:18px}
+  .head{display:flex;gap:16px;align-items:center}
+  .avatar{width:64px;height:64px;border-radius:50%;background:#1a1f27;border:1px solid #222}
+  .pill{padding:6px 10px;border-radius:999px;background:#1a1f27;border:1px solid #222;font-size:12px;display:inline-block;margin-right:8px;margin-top:6px}
+  canvas{background:#0f1115;border:1px solid #222;border-radius:12px;padding:8px}
+</style>
+</head>
+<body>
+<header>
+  <nav>
+    <strong>EMO MOC | プロフィール（折れ線）</strong>
+    <div>
+      <a href="index.html">トップ</a>
+      <a href="post.html">投稿詳細</a>
+      <a href="form.html">投稿フォーム</a>
+    </div>
+  </nav>
+</header>
+
+<main class="card">
+  <div class="head">
+    <div class="avatar"></div>
+    <div>
+      <h2 style="margin:.2em 0">@komoro_soba</h2>
+      <div>体験・食品ローカル特派員（長野）</div>
+      <div style="margin-top:6px">
+        <span class="pill">直近10投稿の平均：信頼 36%</span>
+        <span class="pill">疑念トレンド：↘ 減少</span>
+        <span class="pill">累計CV相関：0.42（暫定）</span>
+      </div>
+    </div>
+  </div>
+
+  <h3 style="margin-top:18px">感情ポートフォリオ（直近10投稿）</h3>
+  <canvas id="line"></canvas>
+</main>
+
+<script>
+  // ===== ダミーデータ（API置換ポイント） =====
+  const posts = [
+    {title:"蕎麦打ち体験", trust:40, interest:28, joy:24, doubt:8},
+    {title:"酒蔵見学", trust:34, interest:32, joy:22, doubt:12},
+    {title:"和菓子作り", trust:38, interest:30, joy:20, doubt:12},
+    {title:"味噌樽仕込み", trust:35, interest:35, joy:18, doubt:12},
+    {title:"茶畑体験", trust:41, interest:29, joy:20, doubt:10},
+    {title:"木曽漆ワーク", trust:45, interest:27, joy:18, doubt:10},
+    {title:"鉢植え盆栽", trust:37, interest:33, joy:20, doubt:10},
+    {title:"焚き火珈琲", trust:39, interest:31, joy:22, doubt:8},
+    {title:"渓流釣り", trust:33, interest:36, joy:23, doubt:8},
+    {title:"山家料理", trust:36, interest:34, joy:22, doubt:8},
+  ];
+  const labels = posts.map((p,i)=>`${i+1}`);
+  const trust = posts.map(p=>p.trust);
+  const interest = posts.map(p=>p.interest);
+  const joy = posts.map(p=>p.joy);
+  const doubt = posts.map(p=>p.doubt);
+
+  const ctx = document.getElementById('line').getContext('2d');
+  new Chart(ctx,{
+    type:'line',
+    data:{ labels,
+      datasets:[
+        {label:'信頼', data:trust, tension:.3},
+        {label:'期待', data:interest, tension:.3},
+        {label:'喜び', data:joy, tension:.3},
+        {label:'疑念', data:doubt, tension:.3},
+      ]},
+    options:{
+      responsive:true,
+      plugins:{legend:{position:'bottom'}},
+      scales:{
+        y:{beginAtZero:true,max:60,ticks:{stepSize:10},grid:{color:'#222'}},
+        x:{grid:{color:'#191b21'}}
+      }
+    }
+  });
+</script>
+</body>
+</html>
